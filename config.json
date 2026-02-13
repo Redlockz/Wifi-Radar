@@ -1,0 +1,28 @@
+{
+    "capture": {
+        "interface": "wlan0mon",
+        "channel": 6,
+        "frequency_ghz": 2.4,
+        "sampling_duration": 0.1
+    },
+    "filtering": {
+        "bssid_filter": [],
+        "packet_types": ["Beacon", "Data"]
+    },
+    "features": {
+        "rssi_enabled": true,
+        "phase_enabled": true,
+        "fft_enabled": true
+    },
+    "spatial": {
+        "grid_size": [10, 10],
+        "bin_mode": "time",
+        "bin_duration": 1.0,
+        "normalization": true
+    },
+    "visualization": {
+        "update_interval": 0.5,
+        "colormap": "hot",
+        "figsize": [10, 8]
+    }
+}
