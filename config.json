@@ -7,7 +7,10 @@
     },
     "filtering": {
         "bssid_filter": [],
-        "packet_types": ["Beacon", "Data"]
+        "packet_types": [
+            "Beacon",
+            "Data"
+        ]
     },
     "features": {
         "rssi_enabled": true,
@@ -15,7 +18,10 @@
         "fft_enabled": true
     },
     "spatial": {
-        "grid_size": [10, 10],
+        "grid_size": [
+            10,
+            10
+        ],
         "bin_mode": "time",
         "bin_duration": 1.0,
         "normalization": true
@@ -23,6 +29,14 @@
     "visualization": {
         "update_interval": 0.5,
         "colormap": "hot",
-        "figsize": [10, 8]
+        "figsize": [
+            10,
+            8
+        ]
+    },
+    "_auto_detected": {
+        "platform": "Linux",
+        "note": "No WiFi interface detected, using platform defaults",
+        "detected_at": "2026-02-13T13:48:50.663859"
     }
 }
