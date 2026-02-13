@@ -261,11 +261,17 @@ def main():
         radar = WiFiRadar(config_file=args.config)
         radar.initialize()
         
-        # Override config with command line arguments
-        if args.interface:
-            radar.capture.interface = args.interface
-        if args.channel:
-            radar.capture.channel = args.channel
+        # Apply command-line overrides before starting
+        if args.interface or args.channel:
+            logger.info("Applying command-line overrides to configuration")
+            if args.interface:
+                radar.config['capture']['interface'] = args.interface
+                radar.capture.interface = args.interface
+                logger.info(f"  Interface: {args.interface}")
+            if args.channel:
+                radar.config['capture']['channel'] = args.channel
+                radar.capture.channel = args.channel
+                logger.info(f"  Channel: {args.channel}")
         
         # Start system
         radar.start()

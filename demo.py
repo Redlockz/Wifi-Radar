@@ -10,6 +10,9 @@ from feature_extraction import FeatureExtractor
 from spatial_model import SpatialModel
 from heatmap_visualizer import HeatmapVisualizer
 
+# Constant for preventing division by zero
+EPSILON = 0.001
+
 def generate_simulated_packets(num_packets=50, with_motion=True):
     """Generate simulated packet data"""
     packets = []
@@ -61,7 +64,7 @@ def demo_feature_extraction():
     print(f"\n3. Disturbance Scores:")
     print(f"  Static: {disturbance_static:.3f}")
     print(f"  Motion: {disturbance_motion:.3f}")
-    print(f"  Ratio: {disturbance_motion/max(disturbance_static, 0.001):.2f}x")
+    print(f"  Ratio: {disturbance_motion/max(disturbance_static, EPSILON):.2f}x")
 
 
 def demo_spatial_model():

@@ -75,6 +75,11 @@ class SpatialModel:
         
         Args:
             disturbance: Disturbance score to distribute
+        
+        Note: This is a SIMULATION for PoC purposes only. In a real passive WiFi
+        sensing system, spatial distribution would be calculated using triangulation
+        from multiple synchronized receivers or CSI-based localization techniques.
+        The randomized distribution below does NOT represent actual motion locations.
         """
         # Create a disturbance pattern
         # In a real system, this would use spatial information from multiple APs

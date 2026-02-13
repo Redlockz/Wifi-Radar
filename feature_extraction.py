@@ -10,6 +10,13 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
+# Feature weight constants for disturbance score calculation
+RSSI_VARIANCE_WEIGHT = 0.3
+PHASE_VARIANCE_WEIGHT = 0.2
+FFT_ENERGY_WEIGHT = 0.3
+PHASE_DELTA_WEIGHT = 0.2
+DISTURBANCE_NORMALIZATION_FACTOR = 100.0
+
 
 class FeatureExtractor:
     """Extract features from WiFi packets for motion detection"""
@@ -47,12 +54,14 @@ class FeatureExtractor:
         rssi_values = [p['rssi'] for p in packets if p['rssi'] is not None]
         
         # Extract phase values (use timestamp as proxy if phase not available)
+        # Note: When actual phase data is unavailable, timestamp modulo is used as a proxy.
+        # This is a significant limitation and affects phase-based motion detection accuracy.
         phase_values = []
         for p in packets:
             if p['phase'] is not None:
                 phase_values.append(p['phase'])
             else:
-                # Use timestamp modulo as phase proxy
+                # Use timestamp modulo as phase proxy (0-2π based on fractional second)
                 phase_values.append((p['timestamp'] % 1.0) * 2 * np.pi)
         
         # Calculate RSSI features
@@ -135,18 +144,18 @@ class FeatureExtractor:
         score = 0.0
         
         # RSSI variance indicates signal fluctuation (motion)
-        score += features['rssi_variance'] * 0.3
+        score += features['rssi_variance'] * RSSI_VARIANCE_WEIGHT
         
         # Phase variance indicates multipath changes (motion)
-        score += features['phase_variance'] * 0.2
+        score += features['phase_variance'] * PHASE_VARIANCE_WEIGHT
         
         # FFT energy indicates temporal changes
-        score += features['fft_energy'] * 0.3
+        score += features['fft_energy'] * FFT_ENERGY_WEIGHT
         
         # Phase delta indicates phase shift over time
-        score += features['phase_delta'] * 0.2
+        score += features['phase_delta'] * PHASE_DELTA_WEIGHT
         
         # Normalize to 0-1 range (heuristic scaling)
-        score = min(score / 100.0, 1.0)
+        score = min(score / DISTURBANCE_NORMALIZATION_FACTOR, 1.0)
         
         return float(score)

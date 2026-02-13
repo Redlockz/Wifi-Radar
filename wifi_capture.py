@@ -34,8 +34,9 @@ class WiFiCapture:
     def set_channel(self, channel):
         """Set WiFi channel for monitoring"""
         try:
-            import os
-            os.system(f"iwconfig {self.interface} channel {channel}")
+            import subprocess
+            subprocess.run(['iwconfig', self.interface, 'channel', str(channel)],
+                          check=False, capture_output=True)
             logger.info(f"Set {self.interface} to channel {channel}")
         except Exception as e:
             logger.error(f"Failed to set channel: {e}")
