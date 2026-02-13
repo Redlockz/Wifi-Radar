@@ -2,6 +2,8 @@
 
 A Proof of Concept (PoC) system for passive WiFi sensing that creates a motion heatmap using existing WiFi traffic only (no active radar).
 
+**Now optimized for macOS (M2 Macs) with automatic configuration!**
+
 ## Overview
 
 This system leverages ambient WiFi traffic to detect motion and visualize it as a live 2D heatmap. It works by analyzing changes in WiFi signal characteristics (RSSI, phase, frequency patterns) caused by movement in the environment.
@@ -18,6 +20,51 @@ This system leverages ambient WiFi traffic to detect motion and visualize it as 
   - Temporal pattern analysis
 - **Spatial Grid Model**: 2D grid with normalized disturbance scores
 - **Configurable**: JSON-based configuration for all parameters
+- **🆕 Auto-Configuration**: Automatic WiFi interface detection and configuration
+- **🆕 Cross-Platform**: Works on both macOS and Linux with platform detection
+- **🆕 NIC Reconnaissance**: Built-in tool to detect and analyze WiFi interfaces
+
+## Platform Support
+
+- **macOS** (including M2 Macs with Ventura 13.7.8+)
+  - Automatic interface detection (en0, en1)
+  - Airport utility integration
+  - Optimized for Apple Silicon
+- **Linux** (Ubuntu/Debian)
+  - Standard WiFi interface support (wlan0, wlan1)
+  - iw/iwconfig integration
+
+See [MACOS.md](MACOS.md) for detailed macOS setup instructions.
+
+## Quick Start
+
+### macOS (Recommended)
+
+```bash
+# 1. Install dependencies
+pip3 install -r requirements.txt
+
+# 2. Auto-configure for your Mac
+sudo python3 wifi_radar.py --auto-config
+
+# 3. Run WiFi Radar
+sudo python3 wifi_radar.py
+```
+
+See [MACOS.md](MACOS.md) for complete macOS guide.
+
+### Linux
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Auto-configure
+sudo python3 wifi_radar.py --auto-config
+
+# 3. Run WiFi Radar
+sudo python3 wifi_radar.py
+```
 
 ## Architecture
 
@@ -27,6 +74,7 @@ This system leverages ambient WiFi traffic to detect motion and visualize it as 
    - Continuous 2.4GHz packet sampling
    - BSSID filtering
    - RSSI and phase extraction
+   - Platform-aware channel control
 
 2. **Feature Extraction** (`feature_extraction.py`)
    - RSSI statistics (mean, variance)
@@ -49,12 +97,23 @@ This system leverages ambient WiFi traffic to detect motion and visualize it as 
    - Orchestrates all components
    - Configuration management
    - Command-line interface
+   - Auto-configuration support
+
+6. **🆕 NIC Detector** (`nic_detector.py`)
+   - Automatic WiFi interface detection
+   - Channel scanning
+   - Platform-specific hardware analysis
+
+7. **🆕 Auto-Config** (`auto_config.py`)
+   - Automatic configuration generation
+   - Platform-aware defaults
+   - Config backup and management
 
 ## Requirements
 
 ### System Requirements
 
-- Linux-based system (tested on Ubuntu/Debian)
+- **macOS** (Ventura 13.7.8+ recommended) or **Linux** (Ubuntu/Debian)
 - WiFi adapter supporting monitor mode
 - Python 3.7+
 - Root/sudo access (for monitor mode configuration)
@@ -73,6 +132,28 @@ Dependencies include:
 
 ## Installation
 
+### macOS Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Redlockz/Wifi-Radar.git
+cd Wifi-Radar
+```
+
+2. Install dependencies:
+```bash
+pip3 install -r requirements.txt
+```
+
+3. Auto-configure for your Mac:
+```bash
+sudo python3 wifi_radar.py --auto-config
+```
+
+See [MACOS.md](MACOS.md) for detailed setup instructions.
+
+### Linux Installation
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/Redlockz/Wifi-Radar.git
@@ -84,7 +165,12 @@ cd Wifi-Radar
 pip install -r requirements.txt
 ```
 
-3. Configure your WiFi interface for monitor mode:
+3. Auto-configure:
+```bash
+sudo python3 wifi_radar.py --auto-config
+```
+
+Or manually configure your WiFi interface for monitor mode:
 ```bash
 # Stop network manager (if running)
 sudo systemctl stop NetworkManager
@@ -100,12 +186,29 @@ sudo ip link set wlan0 name wlan0mon
 
 ## Configuration
 
+### Auto-Configuration (Recommended)
+
+The easiest way to configure WiFi Radar is to use auto-detection:
+
+```bash
+# Automatically detect your WiFi interface and generate config.json
+sudo python3 wifi_radar.py --auto-config
+```
+
+This will:
+- Detect your WiFi interface (e.g., `en0` on macOS, `wlan0` on Linux)
+- Scan for available WiFi channels
+- Generate an optimized `config.json` file
+- Backup any existing configuration
+
+### Manual Configuration
+
 Edit `config.json` to customize system parameters:
 
 ```json
 {
     "capture": {
-        "interface": "wlan0mon",      // Monitor mode interface
+        "interface": "wlan0mon",      // Monitor mode interface (en0 for macOS)
         "channel": 6,                  // WiFi channel (1-11 for 2.4GHz)
         "frequency_ghz": 2.4,
         "sampling_duration": 0.1
@@ -135,6 +238,32 @@ Edit `config.json` to customize system parameters:
 
 ## Usage
 
+### NIC Detection and Reconnaissance
+
+Before running WiFi Radar, you can detect your WiFi interfaces:
+
+```bash
+# Display detailed WiFi interface information
+python3 wifi_radar.py --detect-nic
+```
+
+This shows:
+- Available WiFi interfaces
+- Current channel and SSID
+- Available channels
+- Monitor mode support
+- Recommended configuration
+
+### Auto-Configuration
+
+```bash
+# Auto-detect and configure
+sudo python3 wifi_radar.py --auto-config
+
+# Save to custom config file
+sudo python3 wifi_radar.py --auto-config -c my_config.json
+```
+
 ### Basic Usage
 
 Run with default configuration:
@@ -148,13 +277,25 @@ sudo python3 wifi_radar.py
 sudo python3 wifi_radar.py [OPTIONS]
 
 Options:
-  -c, --config CONFIG    Path to configuration file (default: config.json)
-  -i, --interface IFACE  WiFi interface in monitor mode (overrides config)
-  --channel CHANNEL      WiFi channel to monitor (overrides config)
-  -v, --verbose         Enable verbose logging
+  -c, --config CONFIG      Path to configuration file (default: config.json)
+  -i, --interface IFACE    WiFi interface in monitor mode (overrides config)
+  --channel CHANNEL        WiFi channel to monitor (overrides config)
+  -v, --verbose            Enable verbose logging
+  --auto-config            Auto-detect WiFi interface and generate config.json
+  --detect-nic             Run NIC detection and display information
 ```
 
 ### Examples
+
+Detect your WiFi interface:
+```bash
+python3 wifi_radar.py --detect-nic
+```
+
+Auto-configure for your system:
+```bash
+sudo python3 wifi_radar.py --auto-config
+```
 
 Monitor on specific channel:
 ```bash

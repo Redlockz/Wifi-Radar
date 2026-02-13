@@ -1,11 +1,89 @@
 # Quick Start Guide - WiFi Passive Motion Detection
 
+**Now with Auto-Configuration for macOS and Linux!**
+
 ## Prerequisites
-- Linux system with WiFi adapter supporting monitor mode
+- **macOS** (M2 recommended) or **Linux** with WiFi adapter supporting monitor mode
 - Python 3.7+
 - Root/sudo access
 
-## Installation
+## Quick Start (Recommended)
+
+### Auto-Configuration Method
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Redlockz/Wifi-Radar.git
+cd Wifi-Radar
+
+# 2. Install dependencies
+pip3 install -r requirements.txt
+
+# 3. Auto-detect and configure your WiFi interface
+sudo python3 wifi_radar.py --auto-config
+
+# 4. Run WiFi Radar
+sudo python3 wifi_radar.py
+```
+
+That's it! The auto-configuration will detect your WiFi interface and optimal settings.
+
+## Platform-Specific Notes
+
+### macOS (M2 Ventura)
+
+```bash
+# 1. Install dependencies
+pip3 install -r requirements.txt
+
+# 2. Auto-configure for your Mac
+sudo python3 wifi_radar.py --auto-config
+
+# 3. Disconnect from WiFi (required for monitor mode)
+sudo /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -z
+
+# 4. Run WiFi Radar
+sudo python3 wifi_radar.py
+```
+
+See [MACOS.md](MACOS.md) for detailed macOS instructions.
+
+### Linux
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Auto-configure
+sudo python3 wifi_radar.py --auto-config
+
+# 3. Setup WiFi adapter in monitor mode (if needed)
+sudo systemctl stop NetworkManager
+sudo ip link set wlan0 down
+sudo iw wlan0 set monitor control
+sudo ip link set wlan0 up
+sudo ip link set wlan0 name wlan0mon
+
+# 4. Run WiFi Radar
+sudo python3 wifi_radar.py
+```
+
+## NIC Detection and Reconnaissance
+
+Before configuring, you can scan your WiFi interfaces:
+
+```bash
+# Display WiFi interface information
+python3 wifi_radar.py --detect-nic
+```
+
+This shows:
+- Available WiFi interfaces
+- Current channel and network
+- Available channels
+- Recommended configuration
+
+## Manual Installation (Advanced)
 
 ```bash
 # 1. Clone repository
@@ -33,20 +111,35 @@ python3 demo.py
 ## Basic Usage
 
 ```bash
-# Run with default settings (channel 6, 10x10 grid)
+# Run with auto-configured settings
 sudo python3 wifi_radar.py
+
+# Detect your WiFi interface first
+python3 wifi_radar.py --detect-nic
+
+# Auto-configure
+sudo python3 wifi_radar.py --auto-config
 
 # Specify channel
 sudo python3 wifi_radar.py --channel 11
 
 # Specify interface
-sudo python3 wifi_radar.py -i wlan1mon
+sudo python3 wifi_radar.py -i wlan1mon  # Linux
+sudo python3 wifi_radar.py -i en0       # macOS
 
 # Enable verbose logging
 sudo python3 wifi_radar.py -v
 ```
 
 ## Configuration
+
+### Auto-Configuration (Recommended)
+
+```bash
+sudo python3 wifi_radar.py --auto-config
+```
+
+### Manual Configuration
 
 Edit `config.json` to customize:
 - WiFi channel (1-11 for 2.4GHz)

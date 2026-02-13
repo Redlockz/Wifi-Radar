@@ -246,12 +246,61 @@ def main():
         action='store_true',
         help='Enable verbose logging'
     )
+    parser.add_argument(
+        '--auto-config',
+        action='store_true',
+        help='Auto-detect WiFi interface and generate config.json'
+    )
+    parser.add_argument(
+        '--detect-nic',
+        action='store_true',
+        help='Run NIC detection and display information'
+    )
     
     args = parser.parse_args()
     
     # Configure logging level
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+    
+    # Handle NIC detection mode
+    if args.detect_nic:
+        from nic_detector import NICDetector
+        detector = NICDetector()
+        print("\nScanning for WiFi interfaces...")
+        interfaces = detector.detect_all_interfaces()
+        
+        if not interfaces:
+            print("No WiFi interfaces detected.")
+            return
+        
+        print(f"\nFound {len(interfaces)} WiFi interface(s):\n")
+        for i, iface in enumerate(interfaces, 1):
+            print(f"\n--- Interface {i} ---")
+            detector.print_interface_info(iface)
+        
+        best = detector.get_best_wifi_interface()
+        if best:
+            print("\nRecommended Configuration:")
+            print("-" * 60)
+            print(f"Interface: {best.get('device', 'unknown')}")
+            channel = detector.get_recommended_channel(best)
+            print(f"Channel: {channel}")
+            print("-" * 60)
+            print("\nRun with --auto-config to automatically generate config.json")
+        return
+    
+    # Handle auto-configuration mode
+    if args.auto_config:
+        from auto_config import AutoConfig
+        auto_config = AutoConfig()
+        print("\nDetecting system configuration...")
+        config = auto_config.detect_and_configure()
+        auto_config.print_config_summary(config)
+        auto_config.save_config(config, filepath=args.config)
+        print(f"✓ Configuration saved to {args.config}")
+        print("\nYou can now run wifi_radar.py to start the system.")
+        return
     
     # Register signal handler
     signal.signal(signal.SIGINT, signal_handler)

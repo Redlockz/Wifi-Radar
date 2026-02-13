@@ -35,9 +35,26 @@ class WiFiCapture:
         """Set WiFi channel for monitoring"""
         try:
             import subprocess
-            subprocess.run(['iwconfig', self.interface, 'channel', str(channel)],
-                          check=False, capture_output=True)
-            logger.info(f"Set {self.interface} to channel {channel}")
+            import platform
+            
+            system = platform.system()
+            
+            if system == 'Darwin':  # macOS
+                # Use airport utility to set channel on macOS
+                airport_path = '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport'
+                result = subprocess.run(
+                    [airport_path, '-c', str(channel)],
+                    check=False,
+                    capture_output=True
+                )
+                if result.returncode == 0:
+                    logger.info(f"Set {self.interface} to channel {channel} (macOS)")
+                else:
+                    logger.warning(f"Failed to set channel on macOS: {result.stderr.decode()}")
+            else:  # Linux
+                subprocess.run(['iwconfig', self.interface, 'channel', str(channel)],
+                              check=False, capture_output=True)
+                logger.info(f"Set {self.interface} to channel {channel}")
         except Exception as e:
             logger.error(f"Failed to set channel: {e}")
     
